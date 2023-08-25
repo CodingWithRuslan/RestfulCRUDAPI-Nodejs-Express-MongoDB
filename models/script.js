@@ -14,6 +14,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 <p>Price: $${product.price}</p>
                 <img src="${product.image}" alt="${product.name}" width="200">
                 <button data-product-id="${product._id}">Delete</button>
+                <button onclick="updateProductForm('${product._id}', '${product.name}', ${product.quantity}, ${product.price}, '${product.image}')">Update</button
             `;
             productsDiv.appendChild(productDiv);
         });
@@ -75,4 +76,49 @@ async function deleteProduct(productId) {
     } catch (error) {
         alert('An error occurred: ' + error.message);
     }
+}
+
+function updateProductForm(id, name, quantity, price, image) {
+    const updateForm = `
+    <form id="updateProductForm">
+        <input type="text" id="updateName" value="${name}" required>
+        <input type="number" id="updateQuantity" value="${quantity}" required>
+        <input type="number" id="updatePrice" value="${price}" required>
+        <input type="text" id="updateImage" value="${image}">
+        <button type="submit">Submit Update</button>
+    </form>
+    `;
+
+    // Optionally, you might want to display this form in a specific div or pop-up. 
+    // For simplicity, we're just appending it to the body:
+    document.body.innerHTML += updateForm;
+
+    document.getElementById("updateProductForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const newName = document.getElementById("updateName").value;
+        const newQuantity = document.getElementById("updateQuantity").value;
+        const newPrice = document.getElementById("updatePrice").value;
+        const newImage = document.getElementById("updateImage").value;
+
+        try {
+            const response = await fetch(`/products/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ name: newName, quantity: newQuantity, price: newPrice, image: newImage })
+            });
+
+            const data = await response.json();
+            if (response.status === 200) {
+                alert("Product updated successfully");
+                location.reload();
+            } else {
+                alert("Error: " + data.message);
+            }
+        } catch (error) {
+            alert("Error: " + error.message);
+        }
+    });
 }

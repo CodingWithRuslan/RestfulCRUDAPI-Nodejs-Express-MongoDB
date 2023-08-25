@@ -21,6 +21,20 @@
         <input type="text" id="image" placeholder="Image URL">
         <button type="submit">Add Product</button>
     </form>
+    <!-- Modal for Editing Product -->
+    <div id="updateModal" style="display: none; position: fixed; top: 10%; left: 30%; background-color: white; padding: 20px; border: 1px solid black;">
+        <h3>Update Product</h3>
+        <form id="updateProductForm">
+            <input type="text" id="updateName" placeholder="Product Name" required>
+            <input type="number" id="updateQuantity" placeholder="Quantity" required>
+            <input type="number" id="updatePrice" placeholder="Price" required>
+            <input type="text" id="updateImage" placeholder="Image URL">
+            <input type="hidden" id="productIdToUpdate">
+            <button type="submit">Update</button>
+            <button type="button" onclick="document.getElementById('updateModal').style.display='none'">Cancel</button>
+        </form>
+    </div>
+    
 
     <h2>Products</h2>
     <ul id="productList"></ul>
@@ -50,7 +64,25 @@
                 } catch (error) {
                     alert('An error occurred: ' + error.message);
                 }
+            }else if (e.target.innerText === "Update" && e.target.dataset.productId) {
+                e.preventDefault();
+                const productId = e.target.dataset.productId;
+        
+                // Fetch the product details
+                fetch(`/products/${productId}`)
+                .then(response => response.json())
+                .then(product => {
+                    document.getElementById("updateName").value = product.name;
+                    document.getElementById("updateQuantity").value = product.quantity;
+                    document.getElementById("updatePrice").value = product.price;
+                    document.getElementById("updateImage").value = product.image;
+                    document.getElementById("productIdToUpdate").value = product._id;
+            
+                    // Show the update modal
+                    document.getElementById('updateModal').style.display = 'block';
+                });
             }
+
         });
 
         document.getElementById("addProductForm").addEventListener("submit", async (e) => {
@@ -83,6 +115,38 @@
             }
         });
 
+        document.getElementById("updateProductForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById("updateName").value;
+            const quantity = document.getElementById("updateQuantity").value;
+            const price = document.getElementById("updatePrice").value;
+            const image = document.getElementById("updateImage").value;
+            const productId = document.getElementById("productIdToUpdate").value;
+
+            try {
+                const response = await fetch(`/products/${productId}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ name, quantity, price, image })
+                });
+
+                const data = await response.json();
+
+                if (response.status === 200) {
+                    alert("Product updated successfully");
+                    document.getElementById('updateModal').style.display = 'none';  // Hide the modal
+                    location.reload(); 
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        });
+
         fetch('/products')
             .then(response => response.json())
             .then(products => {
@@ -94,14 +158,20 @@
                     img.alt = product.name; 
                     img.width = 100;
                     const productInfo = document.createTextNode(`${product.name} - ${product.price}$ (Quantity: ${product.quantity})`);
+                    
 
                     const deleteButton = document.createElement('button');
                     deleteButton.innerText = 'Delete';
                     deleteButton.dataset.productId = product._id;  // Attach the product ID to the button using dataset
 
+                    const updateButton = document.createElement('button');
+                    updateButton.innerText = 'Update';
+                    updateButton.dataset.productId = product._id; // Attach the product ID to the button using dataset
+
                     li.appendChild(img); 
                     li.appendChild(productInfo); 
                     li.appendChild(deleteButton);
+                    li.appendChild(updateButton);
                     productListElement.appendChild(li);
                 });
             });

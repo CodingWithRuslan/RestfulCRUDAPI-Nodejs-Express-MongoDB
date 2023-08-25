@@ -47,16 +47,16 @@ app.post('/products', async (req, res) => {
 
 // Delete Product
 app.delete('/products/:id', async (req, res) => {
-  try {
-      const result = await Product.deleteOne({ _id: req.params.id });
-      if (result.deletedCount > 0) {
-          res.status(200).json({ message: 'Product removed' });
-      } else {
-          res.status(404).json({ message: 'Product not found' });
-      }
-  } catch (error) {
-      res.status(500).json({ message: error.message });
-  }
+    try {
+        const result = await Product.deleteOne({ _id: req.params.id });
+        if (result.deletedCount > 0) {
+            res.status(200).json({ message: 'Product removed' });
+        } else {
+            res.status(404).json({ message: 'Product not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 });
 
 // Fetch specific product
@@ -64,7 +64,7 @@ app.get('/products/:id', async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (product) {
-            res.status(200).json(product);
+            res.status(200) .json(product);
         } else {
             res.status(404).json({ message: 'Product not found' });
         }
