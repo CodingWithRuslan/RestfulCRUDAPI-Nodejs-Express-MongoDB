@@ -1,4 +1,4 @@
-# Restful CRUD API for Product Management Build with Node.js, Express and MongoDB i didntspend too much time on UI basic html and css.
+# Restful CRUD API for Product Management Build with Node.js, Express and MongoDB i didnt spend too much time on UI basic html and css.
 This is a Node.js API using Express and Mongoose for CRUD operations on products.
 The application connects to a MongoDB Atlas instance for data storage.
 
