@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+</head>
+
+<body>
+
+    <h1>Product Management</h1>
+
+    <!-- Form to Add a Product -->
+    <h2>Add Product</h2>
+    <form id="addProductForm">
+        <input type="text" id="name" placeholder="Product Name" required>
+        <input type="number" id="quantity" placeholder="Quantity" required>
+        <input type="number" id="price" placeholder="Price" required>
+        <input type="text" id="image" placeholder="Image URL">
+        <button type="submit">Add Product</button>
+    </form>
+
+    <h2>Products</h2>
+    <ul id="productList"></ul>
+
+    <script>
+        document.body.addEventListener("click", async (e) => {
+            // Check if the clicked element is a delete button
+            if (e.target.innerText === "Delete" && e.target.dataset.productId) {
+                e.preventDefault();
+
+                try {
+                    const response = await fetch(`/products/${e.target.dataset.productId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                    });
+
+                    const data = await response.json();
+
+                    if (response.status === 200) {
+                        alert('Product deleted successfully!');
+                        location.reload();  // Refresh the page to reflect the deletion
+                    } else {
+                        alert('Failed to delete product: ' + data.message);
+                    }
+                } catch (error) {
+                    alert('An error occurred: ' + error.message);
+                }
+            }
+        });
+
+        document.getElementById("addProductForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById("name").value;
+            const quantity = document.getElementById("quantity").value;
+            const price = document.getElementById("price").value;
+            const image = document.getElementById("image").value;
+
+            try {
+                const response = await fetch("/products", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ name, quantity, price, image })
+                });
+
+                const data = await response.json();
+
+                if (response.status === 201) {
+                    alert("Product added successfully");
+                    location.reload(); 
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        });
+
+        fetch('/products')
+            .then(response => response.json())
+            .then(products => {
+                const productListElement = document.getElementById('productList');
+                products.forEach(product => {
+                    const li = document.createElement('li');
+                    const img = document.createElement('img');
+                    img.src = product.image; 
+                    img.alt = product.name; 
+                    img.width = 100;
+                    const productInfo = document.createTextNode(`${product.name} - ${product.price}$ (Quantity: ${product.quantity})`);
+
+                    const deleteButton = document.createElement('button');
+                    deleteButton.innerText = 'Delete';
+                    deleteButton.dataset.productId = product._id;  // Attach the product ID to the button using dataset
+
+                    li.appendChild(img); 
+                    li.appendChild(productInfo); 
+                    li.appendChild(deleteButton);
+                    productListElement.appendChild(li);
+                });
+            });
+    </script>
+</body>
+
+</html>
